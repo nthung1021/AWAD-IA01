@@ -3,20 +3,29 @@ import Square from "./Square";
 
 function Board({ xIsNext, squares, onPlay, boardSize }) {
   function handleClick(i) {
-    if (calculateWinner(squares, boardSize) || squares[i]) return;
+    const result = calculateWinner(squares, boardSize);
+    if (result || squares[i]) return;
 
     const nextSquares = squares.slice();
     nextSquares[i] = xIsNext ? "X" : "O";
     onPlay(nextSquares);
   }
 
-  const winner = calculateWinner(squares, boardSize);
+  const result = calculateWinner(squares, boardSize);
   const winLen = getWinLength(boardSize);
 
-  const status = winner
-    ? "Winner: " + winner
-    : "Next player: " + (xIsNext ? "X" : "O");
+  let status: string;
+  if (result?.winner) {
+    status = "Winner: " + result.winner;
+  } else if (squares.every((v) => v !== null)) {
+    status = "Draw: no more moves";
+  } else {
+    status = "Next player: " + (xIsNext ? "X" : "O");
+  }
 
+  const winningLine = result?.line ?? [];
+
+  // Build the board with nested loops
   const boardRows = [];
   for (let r = 0; r < boardSize; r++) {
     const row = [];
@@ -27,6 +36,7 @@ function Board({ xIsNext, squares, onPlay, boardSize }) {
           key={i}
           value={squares[i]}
           onSquareClick={() => handleClick(i)}
+          isHighlight={winningLine.includes(i)}
         />
       );
     }
@@ -54,7 +64,6 @@ function getWinLength(boardSize) {
 
 function calculateWinner(squares, boardSize) {
   const K = getWinLength(boardSize);
-
   const get = (r, c) => squares[r * boardSize + c];
 
   const dirs = [
@@ -73,16 +82,13 @@ function calculateWinner(squares, boardSize) {
         const endR = r + (K - 1) * dr;
         const endC = c + (K - 1) * dc;
 
-        if (
-          endR < 0 ||
-          endR >= boardSize ||
-          endC < 0 ||
-          endC >= boardSize
-        ) {
+        if (endR < 0 || endR >= boardSize || endC < 0 || endC >= boardSize) {
           continue;
         }
 
+        const line = [r * boardSize + c];
         let ok = true;
+
         for (let step = 1; step < K; step++) {
           const rr = r + step * dr;
           const cc = c + step * dc;
@@ -90,8 +96,12 @@ function calculateWinner(squares, boardSize) {
             ok = false;
             break;
           }
+          line.push(rr * boardSize + cc);
         }
-        if (ok) return startVal;
+
+        if (ok) {
+          return { winner: startVal, line };
+        }
       }
     }
   }
