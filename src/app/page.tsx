@@ -28,20 +28,25 @@ function Game() {
     }
     return (
       <li key={move}>
-        <button onClick={() => jumpTo(move)}>{description}</button>
+        <button className="bg-gray-300 p-1 my-1 border-2 rounded-sm"
+                onClick={() => jumpTo(move)}>{description}</button>
       </li>
     );
   });
 
   return (
-    <div className="game">
-      <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+    <>
+      <h1 className="text-4xl font-bold text-center m-10">Simple Tic-tac-toe Game</h1>
+      <div className="flex flex-row justify-center gap-20">
+        <div className="">
+          <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
+        </div>
+        <div className="ml-10">
+          <h2 className="text-xl font-bold mb-3">Steps</h2>
+          <ol className="">{moves}</ol>
+        </div>
       </div>
-      <div className="game-info">
-        <ol>{moves}</ol>
-      </div>
-    </div>
+    </>
   );
 }
 
