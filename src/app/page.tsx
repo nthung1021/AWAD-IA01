@@ -20,16 +20,25 @@ function Game() {
   }
 
   const moves = history.map((squares, move) => {
-    let description;
-    if (move > 0) {
-      description = 'Go to move #' + move;
-    } else {
-      description = 'Go to game start';
+    const buttonLabel = move > 0 ? `Go to move #${move}` : 'Go to game start';
+
+    if (move === currentMove) {
+      const hereLabel = move > 0 ? `You are at move #${move}` : 'You are at game start';
+      return (
+        <li key={move}>
+          <span className="italic text-gray-700">{hereLabel}</span>
+        </li>
+      );
     }
+
     return (
       <li key={move}>
-        <button className="bg-gray-300 p-1 my-1 border-2 rounded-sm"
-                onClick={() => jumpTo(move)}>{description}</button>
+        <button
+          className="bg-gray-300 p-1 my-1 border-2 rounded-sm"
+          onClick={() => jumpTo(move)}
+        >
+          {buttonLabel}
+        </button>
       </li>
     );
   });
