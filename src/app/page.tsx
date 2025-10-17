@@ -8,12 +8,37 @@ export default function Game() {
   const [currentMove, setCurrentMove] = useState(0);
   const [boardSize, setBoardSize] = useState(3);
   const [sortAsc, setSortAsc] = useState(true);
+
+  const [movePositions, setMovePositions] = useState([null]);
+
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
   function handlePlay(nextSquares) {
-    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    const trimmedHistory = history.slice(0, currentMove + 1);
+    const trimmedPositions = movePositions.slice(0, currentMove + 1);
+
+    const prevSquares = trimmedHistory[trimmedHistory.length - 1];
+    let changedIndex = -1;
+    for (let i = 0; i < nextSquares.length; i++) {
+      if (prevSquares[i] !== nextSquares[i]) {
+        changedIndex = i;
+        break;
+      }
+    }
+
+    const nextHistory = [...trimmedHistory, nextSquares];
+
+    let pos = null;
+    if (changedIndex >= 0) {
+      const row = Math.floor(changedIndex / boardSize) + 1;
+      const col = (changedIndex % boardSize) + 1;
+      pos = [row, col];
+    }
+    const nextPositions = [...trimmedPositions, pos];
+
     setHistory(nextHistory);
+    setMovePositions(nextPositions);
     setCurrentMove(nextHistory.length - 1);
   }
 
@@ -26,13 +51,19 @@ export default function Game() {
     setBoardSize(newSize);
     const totalSquares = newSize * newSize;
     setHistory([Array(totalSquares).fill(null)]);
+    setMovePositions([null]);
     setCurrentMove(0);
   }
 
   const moveItems = history.map((_, move) => {
+    const pos = movePositions[move];
+    const posLabel = move > 0 && pos ? ` (${pos[0]}, ${pos[1]})` : "";
+
     if (move === currentMove) {
       const hereLabel =
-        move > 0 ? `You are at move #${move}` : "You are at game start";
+        move > 0
+          ? `You are at move #${move}${posLabel}`
+          : "You are at game start";
       return (
         <li key={move}>
           <span className="italic text-gray-700">{hereLabel}</span>
@@ -40,7 +71,10 @@ export default function Game() {
       );
     }
 
-    const buttonLabel = move > 0 ? `Go to move #${move}` : "Go to game start";
+    const buttonLabel =
+      move > 0
+        ? `Go to move #${move}${posLabel}`
+        : "Go to game start";
     return (
       <li key={move}>
         <button
@@ -89,7 +123,6 @@ export default function Game() {
           >
             Sort moves: {sortAsc ? "Ascending" : "Descending"}
           </button>
-
           <ol>{moves}</ol>
         </div>
       </div>
