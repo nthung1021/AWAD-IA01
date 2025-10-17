@@ -6,7 +6,8 @@ import Board from "./component/Board";
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
-  const [boardSize, setBoardSize] = useState(3); // new state for board size
+  const [boardSize, setBoardSize] = useState(3);
+  const [sortAsc, setSortAsc] = useState(true);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
@@ -20,16 +21,15 @@ export default function Game() {
     setCurrentMove(nextMove);
   }
 
-  // Handle board size change (reset game)
   function handleBoardSizeChange(e) {
-    const newSize = Math.max(3, Math.min(10, parseInt(e.target.value) || 3)); // 3–10 range
+    const newSize = Math.max(3, Math.min(10, parseInt(e.target.value) || 3));
     setBoardSize(newSize);
     const totalSquares = newSize * newSize;
     setHistory([Array(totalSquares).fill(null)]);
     setCurrentMove(0);
   }
 
-  const moves = history.map((squares, move) => {
+  const moveItems = history.map((_, move) => {
     if (move === currentMove) {
       const hereLabel =
         move > 0 ? `You are at move #${move}` : "You are at game start";
@@ -40,8 +40,7 @@ export default function Game() {
       );
     }
 
-    const buttonLabel =
-      move > 0 ? `Go to move #${move}` : "Go to game start";
+    const buttonLabel = move > 0 ? `Go to move #${move}` : "Go to game start";
     return (
       <li key={move}>
         <button
@@ -53,6 +52,8 @@ export default function Game() {
       </li>
     );
   });
+
+  const moves = sortAsc ? moveItems : [...moveItems].reverse();
 
   return (
     <>
@@ -73,7 +74,7 @@ export default function Game() {
       <div className="flex flex-row justify-center gap-20 mt-10">
         <div className="flex flex-col items-center">
           <Board
-            key={boardSize} // force re-render on size change
+            key={boardSize}
             xIsNext={xIsNext}
             squares={currentSquares}
             onPlay={handlePlay}
@@ -81,7 +82,14 @@ export default function Game() {
           />
         </div>
 
-        <div className="mt-4">
+        <div className="mt-4 min-w-56">
+          <button
+            className="mb-3 bg-blue-500 text-white px-3 py-1 rounded"
+            onClick={() => setSortAsc((v) => !v)}
+          >
+            Sort moves: {sortAsc ? "Ascending" : "Descending"}
+          </button>
+
           <ol>{moves}</ol>
         </div>
       </div>
