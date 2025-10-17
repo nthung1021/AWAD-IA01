@@ -1,65 +1,98 @@
-import React from 'react';
-import Square from './Square';
+import React from "react";
+import Square from "./Square";
 
-function Board({ xIsNext, squares, onPlay }) {
+function Board({ xIsNext, squares, onPlay, boardSize }) {
   function handleClick(i) {
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
+    if (calculateWinner(squares, boardSize) || squares[i]) return;
+
     const nextSquares = squares.slice();
-    if (xIsNext) {
-      nextSquares[i] = 'X';
-    } else {
-      nextSquares[i] = 'O';
-    }
+    nextSquares[i] = xIsNext ? "X" : "O";
     onPlay(nextSquares);
   }
 
-  const winner = calculateWinner(squares);
-  let status;
-  if (winner) {
-    status = 'Winner: ' + winner;
-  } else {
-    status = 'Next player: ' + (xIsNext ? 'X' : 'O');
+  const winner = calculateWinner(squares, boardSize);
+  const winLen = getWinLength(boardSize);
+
+  const status = winner
+    ? "Winner: " + winner
+    : "Next player: " + (xIsNext ? "X" : "O");
+
+  const boardRows = [];
+  for (let r = 0; r < boardSize; r++) {
+    const row = [];
+    for (let c = 0; c < boardSize; c++) {
+      const i = r * boardSize + c;
+      row.push(
+        <Square
+          key={i}
+          value={squares[i]}
+          onSquareClick={() => handleClick(i)}
+        />
+      );
+    }
+    boardRows.push(
+      <div className="clear-both table" key={r}>
+        {row}
+      </div>
+    );
   }
 
   return (
     <>
-      <div className="mb-3 text-xl font-bold">{status}</div>
-      <div className="clear-both table">
-        <Square value={squares[0]} onSquareClick={() => handleClick(0)} />
-        <Square value={squares[1]} onSquareClick={() => handleClick(1)} />
-        <Square value={squares[2]} onSquareClick={() => handleClick(2)} />
-      </div>
-      <div className="clear-both table">
-        <Square value={squares[3]} onSquareClick={() => handleClick(3)} />
-        <Square value={squares[4]} onSquareClick={() => handleClick(4)} />
-        <Square value={squares[5]} onSquareClick={() => handleClick(5)} />
-      </div>
-      <div className="clear-both table">
-        <Square value={squares[6]} onSquareClick={() => handleClick(6)} />
-        <Square value={squares[7]} onSquareClick={() => handleClick(7)} />
-        <Square value={squares[8]} onSquareClick={() => handleClick(8)} />
-      </div>
+      <div className="mb-1 text-xl font-bold">{status}</div>
+      <div className="mb-3 text-sm opacity-70">Win condition: {winLen} in a row</div>
+      {boardRows}
     </>
   );
 }
 
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
+function getWinLength(boardSize) {
+  if (boardSize === 3) return 3;
+  if (boardSize === 4) return 4;
+  return 5; // 5x5 or larger
+}
+
+function calculateWinner(squares, boardSize) {
+  const K = getWinLength(boardSize);
+
+  const get = (r, c) => squares[r * boardSize + c];
+
+  const dirs = [
+    [0, 1],
+    [1, 0],
+    [1, 1],
+    [1, -1],
   ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+
+  for (let r = 0; r < boardSize; r++) {
+    for (let c = 0; c < boardSize; c++) {
+      const startVal = get(r, c);
+      if (!startVal) continue;
+
+      for (const [dr, dc] of dirs) {
+        const endR = r + (K - 1) * dr;
+        const endC = c + (K - 1) * dc;
+
+        if (
+          endR < 0 ||
+          endR >= boardSize ||
+          endC < 0 ||
+          endC >= boardSize
+        ) {
+          continue;
+        }
+
+        let ok = true;
+        for (let step = 1; step < K; step++) {
+          const rr = r + step * dr;
+          const cc = c + step * dc;
+          if (get(rr, cc) !== startVal) {
+            ok = false;
+            break;
+          }
+        }
+        if (ok) return startVal;
+      }
     }
   }
   return null;
