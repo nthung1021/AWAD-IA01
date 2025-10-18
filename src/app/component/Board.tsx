@@ -1,8 +1,22 @@
-import React from "react";
+import React, { JSX } from "react";
 import Square from "./Square";
 
-function Board({ xIsNext, squares, onPlay, boardSize }) {
-  function handleClick(i) {
+type Mark = "X" | "O" | null;
+
+interface BoardProps {
+  xIsNext: boolean;
+  squares: Mark[];
+  onPlay: (next: Mark[]) => void;
+  boardSize: number;
+}
+
+interface WinResult {
+  winner: "X" | "O";
+  line: number[];
+}
+
+function Board({ xIsNext, squares, onPlay, boardSize }: BoardProps) {
+  function handleClick(i: number) {
     const result = calculateWinner(squares, boardSize);
     if (result || squares[i]) return;
 
@@ -25,10 +39,9 @@ function Board({ xIsNext, squares, onPlay, boardSize }) {
 
   const winningLine = result?.line ?? [];
 
-  // Build the board with nested loops
-  const boardRows = [];
+  const boardRows: JSX.Element[] = [];
   for (let r = 0; r < boardSize; r++) {
-    const row = [];
+    const row: JSX.Element[] = [];
     for (let c = 0; c < boardSize; c++) {
       const i = r * boardSize + c;
       row.push(
@@ -56,17 +69,17 @@ function Board({ xIsNext, squares, onPlay, boardSize }) {
   );
 }
 
-function getWinLength(boardSize) {
+function getWinLength(boardSize: number): number {
   if (boardSize === 3) return 3;
   if (boardSize === 4) return 4;
-  return 5; // 5x5 or larger
+  return 5;
 }
 
-function calculateWinner(squares, boardSize) {
+function calculateWinner(squares: Mark[], boardSize: number): WinResult | null {
   const K = getWinLength(boardSize);
-  const get = (r, c) => squares[r * boardSize + c];
+  const get = (r: number, c: number): Mark => squares[r * boardSize + c];
 
-  const dirs = [
+  const dirs: Array<[number, number]> = [
     [0, 1],
     [1, 0],
     [1, 1],
@@ -81,10 +94,7 @@ function calculateWinner(squares, boardSize) {
       for (const [dr, dc] of dirs) {
         const endR = r + (K - 1) * dr;
         const endC = c + (K - 1) * dc;
-
-        if (endR < 0 || endR >= boardSize || endC < 0 || endC >= boardSize) {
-          continue;
-        }
+        if (endR < 0 || endR >= boardSize || endC < 0 || endC >= boardSize) continue;
 
         const line = [r * boardSize + c];
         let ok = true;
@@ -99,9 +109,7 @@ function calculateWinner(squares, boardSize) {
           line.push(rr * boardSize + cc);
         }
 
-        if (ok) {
-          return { winner: startVal, line };
-        }
+        if (ok) return { winner: startVal, line };
       }
     }
   }

@@ -1,5 +1,7 @@
 "use client";
 
+type MovePos = [number, number] | null;
+
 import React, { useState } from "react";
 import Board from "./component/Board";
 
@@ -9,12 +11,12 @@ export default function Game() {
   const [boardSize, setBoardSize] = useState(3);
   const [sortAsc, setSortAsc] = useState(true);
 
-  const [movePositions, setMovePositions] = useState([null]);
+  const [movePositions, setMovePositions] = useState<MovePos[]>([null]);
 
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
-  function handlePlay(nextSquares) {
+  function handlePlay(nextSquares: (string | null)[]) {
     const trimmedHistory = history.slice(0, currentMove + 1);
     const trimmedPositions = movePositions.slice(0, currentMove + 1);
 
@@ -29,7 +31,7 @@ export default function Game() {
 
     const nextHistory = [...trimmedHistory, nextSquares];
 
-    let pos = null;
+    let pos: MovePos = null;
     if (changedIndex >= 0) {
       const row = Math.floor(changedIndex / boardSize) + 1;
       const col = (changedIndex % boardSize) + 1;
@@ -42,11 +44,11 @@ export default function Game() {
     setCurrentMove(nextHistory.length - 1);
   }
 
-  function jumpTo(nextMove) {
+  function jumpTo(nextMove: React.SetStateAction<number>) {
     setCurrentMove(nextMove);
   }
 
-  function handleBoardSizeChange(e) {
+  function handleBoardSizeChange(e: { target: { value: string; }; }) {
     const newSize = Math.max(3, Math.min(10, parseInt(e.target.value) || 3));
     setBoardSize(newSize);
     const totalSquares = newSize * newSize;
