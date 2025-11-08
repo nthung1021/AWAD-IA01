@@ -2,7 +2,7 @@
 
 A simple web application demonstrating the Tic-tac-toe game using React library
 
-This is the individual assignment (number 1) in the subject Advanced Web Application Development (AWAD)as an exercise for practicing React.
+This is the individual assignment (number 1) in the subject Advanced Web Application Development (AWAD) as an exercise for practicing React.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
